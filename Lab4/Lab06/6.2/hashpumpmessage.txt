@@ -1,0 +1,12 @@
+message: thisismessage
+key: thisisthekeyiuse
+M = thisisthekeyiusethisismessage
+pad: padding
+
+sha1 H(M): fc1b78c0c48ff6ad24ea30dd6d29165f369d78ef
+command: ./hashpump -s 'fc1b78c0c48ff6ad24ea30dd6d29165f369d78ef' -d 'thisismessage' -a 'padding' -k 16
+sha256 H(M): 81af0d170dea4956c7a768d1803d05cfe01e4a1ade7c9f785476fc489c475c7f
+command: ./hashpump -s '81af0d170dea4956c7a768d1803d05cfe01e4a1ade7c9f785476fc489c475c7f' -d 'thisismessage' -a 'padding' -k 16
+sha512 H(M): 9247a0aadfbe4759433e44f2550c18caf5cf5c993be430d4bed4774bd511bf40b8b0d8727a735a399bb4b771cf9e478330c18e2ea5f27590660b243239e36a93
+command: ./hashpump -s '9247a0aadfbe4759433e44f2550c18caf5cf5c993be430d4bed4774bd511bf40b8b0d8727a735a399bb4b771cf9e478330c18e2ea5f27590660b243239e36a93' -d 'thisismessage' -a 'padding' -k 16
+

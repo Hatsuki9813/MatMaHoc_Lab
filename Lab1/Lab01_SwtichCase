@@ -1,0 +1,142 @@
+
+// g++ -g3 -ggdb -O0 -DDEBUG -I/usr/include/cryptopp Driver.cpp -o Driver.exe -lcryptopp -lpthread
+// g++ -g -O2 -DNDEBUG -I/usr/include/cryptopp Driver.cpp -o Driver.exe -lcryptopp -lpthread
+#ifdef _WIN32
+#include <windows.h>
+#endif
+#include <cstdlib>
+#include <locale>
+#include <cctype>
+#include <iostream>
+using std::cout;
+using std::cerr;
+using std::endl;
+#include <string>
+using std::string;
+#include <cstdlib>
+using std::exit;   		// switch case chon mode?
+#include "files.h"
+using CryptoPP::FileSource;
+using CryptoPP::FileSink;
+using CryptoPP::StreamTransformationFilter;
+using CryptoPP::ArraySource;
+using CryptoPP::ArraySink;
+#include "modes.h"
+using CryptoPP::OFB_Mode;
+#include "osrng.h"
+using CryptoPP::AutoSeededRandomPool;
+#include "cryptlib.h"
+using CryptoPP::Exception;
+#include "hex.h"
+using CryptoPP::HexEncoder;
+using CryptoPP::HexDecoder;
+#include "filters.h"
+using CryptoPP::StringSink;
+using CryptoPP::StringSource;
+using CryptoPP::StreamTransformationFilter;
+#include "aes.h"
+using CryptoPP::AES;
+#include "ccm.h"
+
+int main(int argc, char* argv[])
+{
+	#ifdef __linux__
+    std::locale::global(std::locale("C.utf8"));
+	#endif
+	cout << "Select: 1-KeyGenerattion, 2-Encypt, 3-Decrypt" <<endl;
+	cout << "Choice: "; int choice; std::cin >> choice; cout << endl;
+	AutoSeededRandomPool prng;
+	//string encoded, recovered;
+
+	switch (choice)
+	{
+		case 1:
+		{
+		CryptoPP::byte key[AES::DEFAULT_KEYLENGTH];
+		prng.GenerateBlock(key, sizeof(key));
+		CryptoPP::byte iv[AES::BLOCKSIZE];
+		prng.GenerateBlock(iv, sizeof(iv));
+		string encoded;
+		encoded.clear();
+		//save key to file(binary)
+		StringSource(key, sizeof(key), true,
+		new FileSink("key.bin", true)
+		); // StringSource
+		StringSource(key, sizeof(key), true,
+		new HexEncoder(new FileSink("key.tex"))
+		); // StringSource
+		StringSource(key, sizeof(key), true,
+		new HexEncoder(
+			new StringSink(encoded)
+	) // HexEncoder
+		); // StringSource
+		
+		cout << "key(hex): " << encoded << endl;
+		encoded.clear();
+		StringSource(iv, sizeof(iv), true,
+		new HexEncoder(new FileSink("iv.tex"))
+		);
+		StringSource(iv, sizeof(iv), true,
+		new HexEncoder(
+			new StringSink(encoded)
+		) // HexEncoder
+		); // StringSource
+		cout << "iv: " << encoded << endl;
+		break;
+		}
+		case 2:
+		{
+		string plain = "buổi thực hành số 2";
+		string cipher, encoded;
+		cout << "plain text(hex):" << plain << endl;
+   		OFB_Mode< AES >::Encryption e;
+		CryptoPP::byte key[AES::DEFAULT_KEYLENGTH];
+		prng.GenerateBlock(key, sizeof(key));
+		CryptoPP::byte iv[AES::BLOCKSIZE];
+		prng.GenerateBlock(iv, sizeof(iv));
+		e.SetKeyWithIV(key, sizeof(key), iv); 
+		// Pretty print key
+			StringSource s(plain, true, 
+			new StreamTransformationFilter(e,
+				new StringSink(cipher)
+			)
+		);
+		encoded.clear();
+		StringSource(cipher, true,
+		new HexEncoder(
+			new StringSink(encoded)
+		) // HexEncoder
+		); // StringSource
+		cout << "cipher text: " << encoded << endl;
+		break;
+		}
+		case 3:
+		{
+		string plain = "buổi thực hành số 2";
+		string cipher, recovered;
+		OFB_Mode< AES >::Encryption e;
+		CryptoPP::byte key[AES::DEFAULT_KEYLENGTH];
+		prng.GenerateBlock(key, sizeof(key));
+		CryptoPP::byte iv[AES::BLOCKSIZE];
+		prng.GenerateBlock(iv, sizeof(iv));
+		e.SetKeyWithIV(key, sizeof(key), iv); 
+			StringSource s(plain, true, 
+			new StreamTransformationFilter(e,
+			new StringSink(cipher)
+			)
+		);
+		OFB_Mode< AES >::Decryption d;
+		d.SetKeyWithIV(key, sizeof(key), iv); 
+		// The StreamTransformationFilter removes
+		//  padding as required.
+		StringSource (cipher, true, 
+			new StreamTransformationFilter(d,
+				new StringSink(recovered)
+			) // StreamTransformationFilter
+		); // StringSource
+		cout << "recovered: " << recovered << endl;
+		break;
+		}
+	}
+	return 0;
+}

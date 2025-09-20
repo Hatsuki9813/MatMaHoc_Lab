@@ -1,0 +1,6 @@
+- Chạy giao diện bằng lệnh "python ui", phải cài đặt thư viện Pyqt6 trước
+- Nếu không muốn sử dụng ô nào thì nhập vào số 0 thay vì để trống 
+- VD: Nhập vào từ bàn phím và xuất ra màn hình:
+	+ Nhập input vào ô Input text
+	+ Input file, output file nhập vào "0"
+	+ Kết quả sẽ hiện trong ô Result
